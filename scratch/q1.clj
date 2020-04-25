@@ -1,7 +1,6 @@
-(ns scratch
-  (:gen-class))
+(ns scratch.q1
+  (:require [scratch.common :refer [distance coordinates out-of-bounds? around]]))
 
-(def screen [1 2 3 4 5 6 7 8 9])
 (def stride 3)
 
 (defn get-index
@@ -10,28 +9,6 @@
   (if (nil? coord)
     nil 
     (+ (first coord) (* (second coord) stride))))
-
-(defn out-of-bounds?
-  "checks if the index is outside of the range of our screen array"
-  [coord]
-  (some #(or (<= stride %) (neg? %)) coord))
-
-(defn coordinates
-  "returns the coordinate of the supplied index"
-  [index]
-  (let [fixed-index (- index 1)]
-    [(mod fixed-index stride) (int (/ fixed-index stride))]))
-
-(defn add-to-element
-  "adds a value to an element at an index and returns the resulting collection"
-  [coll index value]
-  (assoc coll index (+ (nth coll index) value)))
-
-(defn neighbors
-  "returns the neighbors in an axis"
-  [coord index]
-  (->> (range -1 2)
-       (map (partial add-to-element coord index))))
 
 (defn knight-neighbors
   "returns the neighbors that can be reached via a knights jump"
@@ -42,38 +19,25 @@
         offsets (apply concat [offsets (mapv reverse offsets)])]
     (->> offsets 
          (map (partial map + coord))
-         (filter (comp not out-of-bounds?))
+         (filter (comp not (partial out-of-bounds? stride)))
          (map get-index)
          (map (partial + 1)))))
-
-(defn around 
-  "returns the elements around the index"
-  [coord]
-  (->> coord
-       (#(neighbors % 0))
-       (mapcat #(neighbors % 1))
-       (filter (comp not out-of-bounds?))
-       (map get-index)
-       (mapv (partial + 1))))
 
 (defn targetables
   "returns the valid moves around the starting point"
   [number]
-  (let [coord (coordinates number)]
+  (let [coord (coordinates number stride)]
     (->> coord
-         (around)
+         (around stride)
+         (map get-index)
+         (mapv (partial + 1))
          (concat (knight-neighbors coord)))))
-
-(defn distance
-  "returns [deltaX deltaY]"
-  [[x1 y1] [x2 y2]]
-  [(- x2 x1) (- y2 y1)])
 
 (defn calculate-intermediate
   "calculates the position between start and end in a 2D array"
   [start end]
-  (let [start-coord (coordinates start)
-        end-coord (coordinates end)
+  (let [start-coord (coordinates start stride)
+        end-coord (coordinates end stride)
         dist (distance start-coord end-coord)]
     (->> dist 
          (map #(/ % 2))
@@ -104,9 +68,3 @@
             (recur (rest remaining)
                    (conj previous (first remaining)))
             false)))))
-
-(assert (true?  (valid-path [1 6 7 4])))
-(assert (true?  (valid-path [2 1 3])))
-(assert (false? (valid-path [1 9])))
-(assert (false? (valid-path [1 2 3 2 1])))
-(assert (false? (valid-path [0 1 2 3])))
