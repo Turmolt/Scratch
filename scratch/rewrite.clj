@@ -15,12 +15,12 @@
     (comp not nil?)
     (map check-winner sets))))
 
-(defn horizontals
+(defn rows
   "returns a set of the horizontal subsets from the board"
   [board]
   (map set board))
 
-(defn verticals
+(defn columns
   "returns a set of the vertical subsets from the board"
   [board]
   (map set (apply map list board)))
@@ -34,8 +34,8 @@
   "checks to see if there is a winner on a tic-tac-toe board"
   [board]
   (check-subsets
-   (map set board)
-   (map set (apply map list board))
+   (rows board)
+   (columns board)
    (diagonal board (partial + 0))
    (diagonal board (partial - 2))))
 
