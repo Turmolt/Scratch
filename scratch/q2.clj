@@ -53,7 +53,7 @@
                    letters))
 
 (defn count-words-in-matrix
-  "finds all occurances of the first letter of the matrix and then checks for the rest of the word around it"
+  "finds all occurances of the first letter of the word in the matrix and then checks for the rest of the word around it"
   [matrix word]
   (reset! stride (count (first matrix)))
   (let [dictionary   (create-dictionary matrix)
